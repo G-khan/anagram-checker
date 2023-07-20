@@ -1,29 +1,23 @@
-# Use the official Kotlin image as the base image
-FROM kotlindocker/kotlin:1.5.21-jdk11-slim AS build
+# Use the official OpenJDK image as the base image
+FROM adoptopenjdk:11-jre-hotspot AS build
 
 # Set the working directory inside the container
 WORKDIR /app
 
 # Copy the source code to the working directory
-COPY src/ ./src/
-COPY gradle/ ./gradle/
-COPY build.gradle ./build.gradle
-COPY gradlew ./gradlew
+COPY . .
 
 # Build the application
 RUN ./gradlew build
 
 # Create a new Docker image with only the necessary artifacts
-FROM openjdk:11-jre-slim
+FROM adoptopenjdk:11-jre-hotspot
 
 # Set the working directory inside the container
 WORKDIR /app
 
 # Copy the compiled application from the build stage to the working directory
-COPY --from=build /app/build/libs/AnagramChecker.jar ./AnagramChecker.jar
-
-# Expose the port on which the application will listen (if applicable)
-# EXPOSE <port>
+COPY --from=build /app/build/libs/anagramchecker-1.0-SNAPSHOT.jar ./AnagramChecker.jar
 
 # Command to run the application
 CMD ["java", "-jar", "AnagramChecker.jar"]
